@@ -1,10 +1,16 @@
 import requests
 from bs4 import BeautifulSoup
 from sentiment_analysis import analyze_sentiment
+from comparative_analysis import comparative_sentiment_analysis
 
 def get_news(company_name):
-    print(f"Fetching news for: {company_name}")  
+    """
+    Fetches news articles from Bing News related to the given company name.
+    Performs sentiment analysis and comparative analysis.
+    """
+    print(f"\nFetching news for: {company_name}")
 
+    # Bing News Search URL
     search_url = f"https://www.bing.com/news/search?q={company_name.replace(' ', '+')}&form=QBNH"
     headers = {"User-Agent": "Mozilla/5.0"}
 
@@ -14,22 +20,22 @@ def get_news(company_name):
         print(f"Failed to fetch news. Status code: {response.status_code}")
         return []
 
-    print("Successfully fetched the webpage. Parsing now...")  
+    print("Successfully fetched the webpage. Parsing now...\n")
     soup = BeautifulSoup(response.text, "html.parser")
-    
-    news_data = []
-    articles = soup.find_all("a", {"class": "title"})  # Updated selector for Bing News
 
-    for idx, article in enumerate(articles[:10]):  # Limiting to 10 articles
+    news_data = []
+    articles = soup.find_all("a", {"class": "title"})  # Bing News headline selector
+
+    for idx, article in enumerate(articles[:10]):  # Limit to 10 articles
         title = article.get_text()
         link = article["href"]
 
-        # No direct summaries available, so we use the title for sentiment analysis
-        sentiment = analyze_sentiment(title)  
+        # Perform sentiment analysis
+        sentiment = analyze_sentiment(title)
 
-        print(f"\nArticle {idx+1}: {title}")  
+        print(f"Article {idx+1}: {title}")
         print(f"Sentiment: {sentiment}")
-        print(f"Link: {link}")
+        print(f"Link: {link}\n")
 
         news_data.append({
             "title": title,
@@ -38,17 +44,23 @@ def get_news(company_name):
             "sentiment": sentiment
         })
 
-    print(f"\nTotal articles fetched: {len(news_data)}")  
+    print(f"\nTotal articles fetched: {len(news_data)}")
+
+    # Perform comparative sentiment analysis if news articles exist
+    if news_data:
+        print("\nComparative Sentiment Analysis:")
+        print(comparative_sentiment_analysis(news_data))
+
     return news_data
 
-# Test the function
+# Run the script for testing
 if __name__ == "__main__":
     company = input("Enter company name: ")
-    print(f"Company entered: {company}")  
+    print(f"\nCompany entered: {company}\n")
     
     news_articles = get_news(company)
     
     if not news_articles:
         print("No articles found. Try a different company name.")
     else:
-        print("\nNews extraction completed successfully!")
+        print("\nNews extraction and analysis completed successfully!")
