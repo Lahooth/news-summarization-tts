@@ -2,11 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 from sentiment_analysis import analyze_sentiment
 from comparative_analysis import comparative_sentiment_analysis
+from tts_generator import generate_tts
 
 def get_news(company_name):
     """
     Fetches news articles from Bing News related to the given company name.
-    Performs sentiment analysis and comparative analysis.
+    Performs sentiment analysis and generates a Hindi TTS summary.
     """
     print(f"\nFetching news for: {company_name}")
 
@@ -49,7 +50,13 @@ def get_news(company_name):
     # Perform comparative sentiment analysis if news articles exist
     if news_data:
         print("\nComparative Sentiment Analysis:")
-        print(comparative_sentiment_analysis(news_data))
+        analysis_result = comparative_sentiment_analysis(news_data)
+        print(analysis_result)
+
+        # Generate Hindi TTS for sentiment summary
+        tts_filename = "sentiment_report.mp3"
+        generate_tts(analysis_result, tts_filename)
+        print(f"Sentiment report saved as: {tts_filename}")
 
     return news_data
 
